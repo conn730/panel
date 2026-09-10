@@ -79,6 +79,13 @@ def _serialize_user_for_node(
         proxy_kwargs["wireguard_peer_ips"] = wireguard_settings.get("peer_ips") or []
     if ProxyProtocol.hysteria in allowed_protocols:
         proxy_kwargs["hysteria_auth"] = user_settings.get("hysteria", {}).get("auth")
+    # CUSTOM: not upstream. See CONTRIBUTING-custom.md. Requires the forked
+    # pasarguard-node-bridge (github.com/conn730/node_bridge_py) — the
+    # upstream PyPI package has no openvpn field on Proxy/create_proxy.
+    if ProxyProtocol.openvpn in allowed_protocols:
+        openvpn_settings = user_settings.get("openvpn", {})
+        proxy_kwargs["openvpn_username"] = openvpn_settings.get("username")
+        proxy_kwargs["openvpn_password"] = openvpn_settings.get("password")
 
     return create_user(
         str(id),

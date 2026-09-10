@@ -43,6 +43,14 @@ dependencies = [
     "nats-py>=2.15.0",
 ]
 
+# CUSTOM: not upstream. See CONTRIBUTING-custom.md. Redirects
+# pasarguard-node-bridge to this fork's node_bridge_py (adds the `openvpn`
+# field to the Proxy message / create_proxy() that the published PyPI
+# package doesn't have) instead of the upstream release. Run `uv lock` after
+# changing this so uv.lock is regenerated against the git source.
+[tool.uv.sources]
+pasarguard-node-bridge = { git = "https://github.com/conn730/node_bridge_py.git", branch = "main" }
+
 [tool.ruff]
 line-length = 120
 indent-width = 4

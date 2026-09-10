@@ -1,4 +1,5 @@
 import json
+import secrets
 from enum import StrEnum
 from ipaddress import ip_network
 from uuid import UUID, uuid4
@@ -36,6 +37,16 @@ class ShadowsocksSettings(BaseModel):
 
 class HysteriaSettings(BaseModel):
     auth: str = Field(default_factory=random_password, min_length=1)
+
+
+# CUSTOM: not upstream. See CONTRIBUTING-custom.md. OpenVPN backend auth is
+# username/password only (v1 — see backend/openvpn's package doc in the node
+# fork), so this mirrors TrojanSettings/HysteriaSettings' shape rather than
+# vmess/vless's UUID-id one. username uses token_hex (not random_password's
+# URL-safe alphabet) to stay a valid OpenVPN Common Name / username-as-CN.
+class OpenVPNSettings(BaseModel):
+    username: str = Field(default_factory=lambda: secrets.token_hex(8))
+    password: str = Field(default_factory=random_password)
 
 
 class WireGuardPeerIPs(BaseModel):
@@ -105,6 +116,8 @@ class ProxyTable(BaseModel):
     shadowsocks: ShadowsocksSettings = Field(default_factory=ShadowsocksSettings)
     wireguard: WireGuardSettings = Field(default_factory=WireGuardSettings)
     hysteria: HysteriaSettings = Field(default_factory=HysteriaSettings)
+    # CUSTOM: not upstream. See CONTRIBUTING-custom.md.
+    openvpn: OpenVPNSettings = Field(default_factory=OpenVPNSettings)
 
     def dict(self, *, no_obj=True, **kwargs):
         if no_obj:
