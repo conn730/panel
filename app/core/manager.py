@@ -10,6 +10,7 @@ from nats.js.kv import KeyValue
 
 from app import on_shutdown, on_startup
 from app.core.abstract_core import AbstractCore
+from app.core.openvpn import OpenVpnConfig  # CUSTOM: not upstream. See CONTRIBUTING-custom.md.
 from app.core.wireguard import WireGuardConfig
 from app.core.xray import XRayConfig
 from app.db import GetDB
@@ -29,6 +30,8 @@ class CoreManager:
     CORE_CLASSES: ClassVar[dict] = {
         CoreType.xray: XRayConfig,
         CoreType.wg: WireGuardConfig,
+        # CUSTOM: not upstream. See CONTRIBUTING-custom.md.
+        CoreType.openvpn: OpenVpnConfig,
     }
 
     def __init__(self):
@@ -80,7 +83,12 @@ class CoreManager:
             # Deserialize state using JSON
             try:
                 cached_state = json.loads(entry.value.decode("utf-8"))
-            except json.JSONDecodeError, UnicodeDecodeError:
+            # UPSTREAM BUG FIX (not a CUSTOM addition — worth a separate PR to
+            # PasarGuard/panel on its own): the Python-2-style
+            # `except A, B:` is a SyntaxError in Python 3 and breaks
+            # importing this module at all. Confirmed present on upstream
+            # main as of 2026-09-10.
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 self._logger.warning("Failed to decode CoreManager state as JSON, ignoring...")
                 return False
 

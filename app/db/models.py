@@ -827,6 +827,9 @@ class CoreType(str, Enum):
     wg = "wg"
     mtproto = "mtproto"
     singbox = "singbox"
+    # CUSTOM: not upstream. See CONTRIBUTING-custom.md and
+    # migrations/versions/a1b2c3d4e5f6_add_openvpn_core_type.py.
+    openvpn = "openvpn"
 
 
 class CoreConfig(Base, CreatedAtUTCMixin):

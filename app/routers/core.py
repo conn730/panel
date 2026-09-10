@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status
 
+from app.core.protocol_catalog import catalog_as_dicts  # CUSTOM: not upstream. See CONTRIBUTING-custom.md.
 from app.db import AsyncSession, get_db
 from app.models.admin import AdminDetails
 from app.models.core import (
@@ -132,3 +133,16 @@ async def bulk_delete_cores(
 ):
     """Delete selected cores by ID."""
     return await core_operator.bulk_remove_cores(db, bulk_cores, admin)
+
+
+# CUSTOM: not upstream. See CONTRIBUTING-custom.md.
+@router.get("/catalog", summary="Full protocol catalog (implemented + planned)")
+async def get_protocol_catalog(
+    _: AdminDetails = Depends(require_permission("cores", "read")),
+):
+    """List every VPN protocol this fork targets, each flagged with whether
+    it has a working core class + node backend yet. The 'create core' UI
+    should show every entry here (not just what CoreManager.CORE_CLASSES
+    currently supports) so protocols still on the roadmap are visible but
+    marked unavailable rather than simply missing."""
+    return {"protocols": catalog_as_dicts()}
